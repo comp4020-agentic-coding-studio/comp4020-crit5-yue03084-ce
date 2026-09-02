@@ -1,9 +1,5 @@
 # Process overview
 
-<!-- TEMPLATE: this file is a shape to fill in, not a form. Replace everything
-     in it with your own overview, and delete this comment — `pnpm
-     check:evidence` will remind you if it's still here. -->
-
 A reading-guide to how the work came together --- a map to your process, not an
 essay about it. Markers read this file and follow its citations; they don't
 trawl the repo for evidence you didn't point at, so if a moment mattered, cite
@@ -17,45 +13,58 @@ cover every deliverable.
 
 ## What I built
 
-One paragraph: the thing, and the idea behind it.
+**Ember & Frost**: a one-mechanic browser game. You are a small flame or ice
+crystal running along the ground; a stream of fire and ice obstacles comes at
+you, and a tap or Space toggles which element you currently are. Match the
+obstacle's element and you pass through it and score a point; mismatch it and
+the run ends. Reach 20 points and you win. No instructions on screen or off ---
+the opening screen puts a single obstacle in front of you fast enough that
+tapping it is the obvious first move.
 
 ## The moments that mattered
 
-Three or four for an assignment; fewer is fine for a weekly prototype. Keep the
-list short so each moment has room to do all four jobs:
+1. **Scoping the idea down.** I came in wanting something like Fireboy and
+   Watergirl --- two characters, co-op movement, a shared level. With roughly
+   two hours to a hard deadline, a second character and level geometry was the
+   part of that idea most likely to leave me with nothing playable. Instead of
+   building toward the full co-op idea, I cut it to the one mechanic underneath
+   it (become the element the obstacle needs) and built that end to end. The
+   scoping decision is recorded as the choice between two directions before any
+   code existed:
+   [`68ce602`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-yue03084-ce/commit/68ce602)
+   is the spec turned into tests for that scoped-down mechanic, written before
+   the game itself.
 
-1. **what happened** --- the problem, or the thing that went wrong
-2. **what you did instead of the obvious thing** --- the call you made, and why
-   it beat the obvious one
-3. **how you knew it was right** --- the check you ran, the viewport you looked
-   at, what you read before accepting the diff
-4. **the citation** --- a commit or commit range, a `CLAUDE.md` change, a check
-   that went from red to green, a prompt paired with the commit it produced
+2. **Making the one rule testable meant keeping it out of the canvas.** The
+   spec asks for one rule of the game to carry a focused automated test. A
+   canvas game loop is awkward to unit-test directly (no DOM, no easy way to
+   assert on pixels), so the actual rule --- same element survives, opposite
+   element ends the run, toggling always flips --- lives in a small DOM-free
+   module (`src/scripts/game-logic.ts`) that both the game and
+   `spec/game.test.ts` import. That's what let the rule tests run without any
+   canvas or browser mocking:
+   [`4001aec`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-yue03084-ce/commit/4001aec).
 
-Jobs 2 and 3 are the ones the repo can't tell a reader on its own, so they're
-where the marks are. The strongest moments are the ones where a correction
-landed in the **harness** --- the standards and checks your work has to satisfy
---- rather than in a retry: a rule added to `CLAUDE.md`, a check wired up, an
-attempt thrown away. Retrying until it passes is the routine case, and changing
-what the work runs against is the skilled one.
+3. **A bug that only playing the game surfaced.** Reading `main.ts`, spawning
+   the first obstacle at a random gap looked fine --- it's the same code path
+   as every later obstacle. Playing the built game showed the actual effect:
+   the opening screen sat empty for close to a second before anything arrived,
+   which is exactly the dead air the spec's "the opening screen invites the
+   first move" line rules out. I fixed it by giving only the first spawn a
+   short, fixed distance and leaving every later gap randomised, in
+   [`4001aec`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-yue03084-ce/commit/4001aec)
+   (see the comment on `reset()` in `src/scripts/main.ts`). This is the kind of
+   change that doesn't show up from reading the code --- only from watching the
+   first second of play.
 
-Cite each moment as a link whose text is the commit hash or range and whose
-target is this repo's commit or compare URL, so a reader clicks straight to the
-evidence:
-
-- one commit: [`a1b2c3d`](https://github.com/YOUR-ORG/YOUR-REPO/commit/a1b2c3d)
-- a range:
-  [`a1b2c3d...e4f5a6b`](https://github.com/YOUR-ORG/YOUR-REPO/compare/a1b2c3d...e4f5a6b)
-
-To pair a prompt with the commit it produced, quote the prompt (curated, not a
-full transcript) next to the citation:
-
-> the prompt, verbatim
-
-Screenshots are welcome where one carries the verification better than a
-sentence does. Commit the file to this repo and link it with a **relative**
-path, which is what makes it render on GitHub: `![alt text](docs/before.png)`.
-Images don't count towards the word count and don't replace the citation.
+4. **Checking both viewports before calling it done.** `CLAUDE.md`'s rule to
+   check layouts at both a wide and a narrow viewport isn't specific to boxes
+   with fixed heights --- it applies here too, since the canvas is sized from
+   `window.innerWidth/innerHeight` and the score/header sit in fixed corners.
+   I played the built game in the browser at both a ~1500px window and a
+   420x800 window and confirmed the flame, ground line, score, and header all
+   render without overlap or clipping at either size before committing
+   [`4001aec`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-yue03084-ce/commit/4001aec).
 
 ## Before you ship
 
