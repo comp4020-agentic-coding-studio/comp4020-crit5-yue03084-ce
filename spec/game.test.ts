@@ -2,18 +2,19 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { JSDOM } from "jsdom";
 import { describe, expect, it } from "vitest";
+import { survivesObstacle, toggleElement } from "../src/scripts/game-logic";
 
 // This week's brief (crit 5, "A game"): a small browser game with rules,
 // stakes, and an ending, that teaches itself with no instructions anywhere.
 // Only the mechanically-checkable spec lines are here — see
 // https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/crits/05-game/
 // for the full spec. Left to the crit, because only a person can judge them:
-// whether the opening screen actually makes the first move obvious, whether a
-// stranger reaches an ending inside five minutes, and whether one rule has a
-// focused test of its own (that test is the student's to add once the
-// mechanic exists — this file can't write it in advance).
+// whether the opening screen actually makes the first move obvious, and
+// whether a stranger reaches an ending inside five minutes.
 //
-// These start red: there's no game yet, only the starter page.
+// The build-level checks below start red until the game exists; the rule
+// tests at the bottom exercise the actual mechanic (Ember & Frost: an
+// obstacle only kills you when your current element doesn't match its own).
 
 const DIST = resolve("dist");
 
@@ -82,5 +83,22 @@ describe("game: can be lost", () => {
       endingSignal,
       "no win/loss/finish signal found in the shipped script — the spec asks for play that ends somewhere",
     ).toBe(true);
+  });
+});
+
+describe("game rule: matching your element to an obstacle is what keeps you alive", () => {
+  it("survives an obstacle of the same element", () => {
+    expect(survivesObstacle("fire", "fire")).toBe(true);
+    expect(survivesObstacle("ice", "ice")).toBe(true);
+  });
+
+  it("dies to an obstacle of the opposite element", () => {
+    expect(survivesObstacle("fire", "ice")).toBe(false);
+    expect(survivesObstacle("ice", "fire")).toBe(false);
+  });
+
+  it("toggling always flips fire and ice, never holds or skips", () => {
+    expect(toggleElement("fire")).toBe("ice");
+    expect(toggleElement("ice")).toBe("fire");
   });
 });
