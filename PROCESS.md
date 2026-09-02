@@ -17,9 +17,11 @@ cover every deliverable.
 crystal running along the ground; a stream of fire and ice obstacles comes at
 you, and a tap or Space toggles which element you currently are. Match the
 obstacle's element and you pass through it and score a point; mismatch it and
-the run ends. Reach 20 points and you win. No instructions on screen or off ---
+the run ends. Reach 40 points and you win. No instructions on screen or off ---
 the opening screen puts a single obstacle in front of you fast enough that
-tapping it is the obvious first move.
+tapping it is the obvious first move. Five levels carry the run from a forest
+day through dusk, night, and aurora to an icy dawn, each one faster than the
+last and, from level 3, occasionally throwing obstacles in fast pairs.
 
 ## The moments that mattered
 
@@ -65,6 +67,15 @@ tapping it is the obvious first move.
    420x800 window and confirmed the flame, ground line, score, and header all
    render without overlap or clipping at either size before committing
    [`4001aec`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-yue03084-ce/commit/4001aec).
+
+5. **Extending the run without touching the tested rule.** Playing the
+   20-point version end to end showed the real problem: a run was over in
+   under a minute, before the difficulty had anywhere to go. The fix was a
+   level system (five palettes, a per-level speed increase, faster obstacle
+   pairs from level 3) layered entirely inside `main.ts`'s canvas drawing and
+   spawn logic --- `game-logic.ts` and `spec/game.test.ts` are untouched, so
+   the one rule the spec asks to be tested still is, unchanged, in
+   [`0ad9980`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-yue03084-ce/commit/0ad9980).
 
 ## Before you ship
 
